@@ -23,6 +23,7 @@ after_test:
 - ps: |
     $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
     Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
+    Get-ChildItem -Recurse c:\msys64\
     bash codecov.sh -s "coverage/*.xml" -t $env:CODECOV_REPO_TOKEN
 for:
 -
