@@ -21,7 +21,7 @@ namespace MongoDB.ApplicationInsights
         /// <param name="telemetryClient">The telemetry client to send telemetry to</param>
         /// <param name="settings">Telemetry settings</param>
         public MongoClientFactory(
-            TelemetryClient telemetryClient,
+            TelemetryClient telemetryClient = null,
             MongoApplicationInsightsSettings settings = null)
         {
             _telemetryClient = telemetryClient;
@@ -35,8 +35,11 @@ namespace MongoDB.ApplicationInsights
         /// <returns>The client</returns>
         public IMongoClient GetClient(MongoClientSettings clientSettings)
         {
-            new MongoApplicationInsightsTelemetry(
-                clientSettings, _telemetryClient, Settings);
+            if (_telemetryClient != null)
+            {
+                new MongoApplicationInsightsTelemetry(
+                    clientSettings, _telemetryClient, Settings);
+            }
             return new MongoClient(clientSettings);
         }
 
@@ -47,7 +50,7 @@ namespace MongoDB.ApplicationInsights
         /// <returns>The client</returns>
         public IMongoClient GetClient(string connectionString)
         {
-            return new MongoClient(
+            return GetClient(
                 MongoClientSettings.FromConnectionString(connectionString));
         }
 
@@ -58,7 +61,7 @@ namespace MongoDB.ApplicationInsights
         /// <returns>The client</returns>
         public IMongoClient GetClient(MongoUrl mongoUrl)
         {
-            return new MongoClient(MongoClientSettings.FromUrl(mongoUrl));
+            return GetClient(MongoClientSettings.FromUrl(mongoUrl));
         }
     }
 }

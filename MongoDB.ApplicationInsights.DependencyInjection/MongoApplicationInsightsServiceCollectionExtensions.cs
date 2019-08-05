@@ -21,7 +21,10 @@ namespace MongoDB.ApplicationInsights.DependencyInjection
             MongoApplicationInsightsSettings settings = null
         ) => services
                 .AddSingleton(settings ?? new MongoApplicationInsightsSettings())
-                .AddSingleton<IMongoClientFactory, MongoClientFactory>();
+                .AddSingleton<IMongoClientFactory>(sp => new MongoClientFactory(
+                    sp.GetService<TelemetryClient>(),
+                    sp.GetRequiredService<MongoApplicationInsightsSettings>()
+                ));
 
         private static IMongoClientFactory GetFactory(IServiceProvider sp) =>
             sp.GetRequiredService<IMongoClientFactory>();

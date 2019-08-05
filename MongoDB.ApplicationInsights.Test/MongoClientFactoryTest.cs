@@ -58,5 +58,14 @@ namespace MongoDB.ApplicationInsights.Test
             result.Settings.Server.Should().BeEquivalentTo(
                 new MongoServerAddress("localhost", 27019));
         }
+
+        [Test]
+        public void GetClientWithNoTelemetry()
+        {
+            var factory = new MongoClientFactory();
+            var result = factory.GetClient("mongodb://localhost");
+            result.Settings.Server.Should().BeEquivalentTo(
+                new MongoServerAddress("localhost", 27017));
+        }
     }
 }

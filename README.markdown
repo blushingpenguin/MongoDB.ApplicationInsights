@@ -74,10 +74,10 @@ The telemetry can be configured by passing an instance of `MongoApplicationInsig
 `MongoClientFactory` takes mongo settings, application insights settings and constructs instances of `MongoClient` with the settings applied.
 
 ```csharp
-public MongoClientFactory(TelemetryClient telemetryClient, MongoApplicationInsightsSettings settings = null)
+public MongoClientFactory(TelemetryClient telemetryClient = null, MongoApplicationInsightsSettings settings = null)
 ```
 
-The constructor takes an instance of the telemetry client to use, and the telemetry settings.
+The constructor takes an instance of the telemetry client to use, and the telemetry settings. If no telemetry client is supplied, then telemetry is disabled. If no settings are supplied then a default settings object is constructed.
 
 ```csharp
 IMongoClient GetClient(MongoClientSettings clientSettings);
@@ -85,7 +85,7 @@ IMongoClient GetClient(MongoUrl mongoUrl);
 IMongoClient GetClient(string connectionString);
 ```
 
-These functions construct a `MongoClient` instance in the same way as the corresponding `MongoClient` constructor calls, but with telemetry applied.
+These functions construct a `MongoClient` instance in the same way as the corresponding `MongoClient` constructor calls, but with telemetry applied (if a telemetry client was supplied to the constructor).
 
 The dependency injection helper will register a singleton `MongoClientFactory`:
 
@@ -119,3 +119,5 @@ public static IServiceCollection AddMongoClient(
 ```
 
 These three helpers register a singleton `MongoClientFactory` instance using the provided settings (if any), and then a singleton `IMongoClient` which will construct a client using the factory and the provided mongo client settings.  There is a short example of using these at the start of this document.
+
+If no TelemetryClient instance is registered in the dependency injection container then telemetry will be disabled.

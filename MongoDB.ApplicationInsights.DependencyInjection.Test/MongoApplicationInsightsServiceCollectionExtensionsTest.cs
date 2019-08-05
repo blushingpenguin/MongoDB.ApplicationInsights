@@ -84,5 +84,16 @@ namespace MongoDB.ApplicationInsights.DependencyInjection.Test
             client.Settings.Server.Should().BeEquivalentTo(
                 new MongoServerAddress("localhost", 27017));
         }
+
+        [Test]
+        public void AddMongoClientWithNoTelemetry()
+        {
+            var services = new ServiceCollection();
+            services.AddMongoClient("mongodb://localhost:27018");
+            var sp = services.BuildServiceProvider();
+            var client = sp.GetRequiredService<IMongoClient>();
+            client.Settings.Server.Should().BeEquivalentTo(
+                new MongoServerAddress("localhost", 27018));
+        }
     }
 }
