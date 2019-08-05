@@ -16,8 +16,9 @@ environment:
 configuration:
   - Release
 test_script:
-  - dotnet test --configuration Release --filter=TestCategory!=ApiTests /p:CollectCoverage=true /p:Exclude='\"[*TestAdapter*]*,[*]*.Startup*,[*]*.Program,[*.Test*]*,[nunit*]*\"' /p:ExcludeByAttribute='\"Obsolete,GeneratedCode,CompilerGeneratedAttribute\"'  /p:CoverletOutputFormat=cobertura /p:CoverletOutput=../coverage/MongoDB.ApplicationInsights.coverage.cobertura.xml /p:Threshold=90 /p:ThresholdType=branch MongoDB.ApplicationInsights.Test/MongoDB.ApplicationInsights.Test.csproj
-  - dotnet test --configuration Release --filter=TestCategory!=ApiTests /p:CollectCoverage=true /p:Exclude='\"[*TestAdapter*]*,[*]*.Startup*,[*]*.Program,[*.Test*]*,[nunit*]*,[MongoDB.ApplicationInsights]*\"' /p:ExcludeByAttribute='\"Obsolete,GeneratedCode,CompilerGeneratedAttribute\"'  /p:CoverletOutputFormat=cobertura /p:CoverletOutput=../coverage/MongoDB.ApplicationInsights.DependencyInjection.coverage.cobertura.xml /p:Threshold=90 /p:ThresholdType=branch MongoDB.ApplicationInsights.DependencyInjection.Test/MongoDB.ApplicationInsights.DependencyInjection.Test.csproj
+  - cmd: |
+      dotnet test --configuration Release --filter=TestCategory!=ApiTests /p:CollectCoverage=true /p:Exclude='\"[*TestAdapter*]*,[*]*.Startup*,[*]*.Program,[*.Test*]*,[nunit*]*\"' /p:ExcludeByAttribute='\"Obsolete,GeneratedCode,CompilerGeneratedAttribute\"'  /p:CoverletOutputFormat=cobertura /p:CoverletOutput=../coverage/MongoDB.ApplicationInsights.coverage.cobertura.xml /p:Threshold=90 /p:ThresholdType=branch MongoDB.ApplicationInsights.Test/MongoDB.ApplicationInsights.Test.csproj
+      dotnet test --configuration Release --filter=TestCategory!=ApiTests /p:CollectCoverage=true /p:Exclude='\"[*TestAdapter*]*,[*]*.Startup*,[*]*.Program,[*.Test*]*,[nunit*]*,[MongoDB.ApplicationInsights]*\"' /p:ExcludeByAttribute='\"Obsolete,GeneratedCode,CompilerGeneratedAttribute\"'  /p:CoverletOutputFormat=cobertura /p:CoverletOutput=../coverage/MongoDB.ApplicationInsights.DependencyInjection.coverage.cobertura.xml /p:Threshold=90 /p:ThresholdType=branch MongoDB.ApplicationInsights.DependencyInjection.Test/MongoDB.ApplicationInsights.DependencyInjection.Test.csproj
 after_test:
 - ps: |
     $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
