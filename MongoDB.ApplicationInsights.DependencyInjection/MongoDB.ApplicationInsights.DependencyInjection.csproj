@@ -12,6 +12,9 @@
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
     <Version>1.0.0</Version>
+    <Authors>blushingpenguin</Authors>
+    <Company>Blushing Penguin Coding Club</Company>
+    <Product>MongoDB.ApplicationInsights</Product>
   </PropertyGroup>
 
   <ItemGroup>
