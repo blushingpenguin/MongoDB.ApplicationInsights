@@ -21,10 +21,12 @@ test_script:
       dotnet test --configuration Release --filter=TestCategory!=ApiTests /p:CollectCoverage=true /p:Exclude='\"[*TestAdapter*]*,[*]*.Startup*,[*]*.Program,[*.Test*]*,[nunit*]*,[MongoDB.ApplicationInsights]*\"' /p:ExcludeByAttribute='\"Obsolete,GeneratedCode,CompilerGeneratedAttribute\"'  /p:CoverletOutputFormat=cobertura /p:CoverletOutput=../coverage/MongoDB.ApplicationInsights.DependencyInjection.coverage.cobertura.xml /p:Threshold=90 /p:ThresholdType=branch MongoDB.ApplicationInsights.DependencyInjection.Test/MongoDB.ApplicationInsights.DependencyInjection.Test.csproj
 after_test:
 - ps: |
+    iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
     $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
     write-host $env:PATH
     dir env:\
     dir c:\msys64\
+    dir c:\
     Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
     Get-ChildItem -Recurse -Path 'c:\msys64\'
     bash codecov.sh -f '"coverage/*.xml"' -t $env:CODECOV_REPO_TOKEN
