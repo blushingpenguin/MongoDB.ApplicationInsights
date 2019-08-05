@@ -1,0 +1,39 @@
+image: Visual Studio 2017
+version: 1.0.{build}
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
+  assembly_version: '{version}'
+  file_version: '{version}'
+  informational_version: '{version}'
+before_build:
+- cmd: nuget restore
+environment:
+  CODECOV_REPO_TOKEN:
+    secure: 2z0PTX/jf8wA5zyNxr1ToPNJMrXpV4B3doSIvARWaT7cQ/TcHH9z1kK8VCWi+xf+
+configuration:
+  - Release
+test_script:
+  - dotnet test --configuration Release --filter=TestCategory!=ApiTests /p:CollectCoverage=true /p:Exclude='\"[*TestAdapter*]*,[*]*.Startup*,[*]*.Program,[*.Test*]*,[nunit*]*\"' /p:ExcludeByAttribute='\"Obsolete,GeneratedCode,CompilerGeneratedAttribute\"'  /p:CoverletOutputFormat=cobertura /p:CoverletOutput=../coverage/MongoDB.ApplicationInsights.coverage.cobertura.xml /p:Threshold=90 /p:ThresholdType=branch MongoDB.ApplicationInsights.Test/MongoDB.ApplicationInsights.Test.csproj
+  - dotnet test --configuration Release --filter=TestCategory!=ApiTests /p:CollectCoverage=true /p:Exclude='\"[*TestAdapter*]*,[*]*.Startup*,[*]*.Program,[*.Test*]*,[nunit*]*,[MongoDB.ApplicationInsights]*\"' /p:ExcludeByAttribute='\"Obsolete,GeneratedCode,CompilerGeneratedAttribute\"'  /p:CoverletOutputFormat=cobertura /p:CoverletOutput=../coverage/MongoDB.ApplicationInsights.DependencyInjection.coverage.cobertura.xml /p:Threshold=90 /p:ThresholdType=branch MongoDB.ApplicationInsights.DependencyInjection.Test/MongoDB.ApplicationInsights.DependencyInjection.Test.csproj
+after_test:
+- ps: |
+    $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
+    Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
+    bash codecov.sh -f "coverage/*.xml" -t $env:CODECOV_REPO_TOKEN
+for:
+-
+  branches:
+    only:
+      - master
+
+  build:
+    publish_nuget: true
+
+  deploy:
+    provider: NuGet
+    api_key:
+      secure: lo9gC4NDoECBxAzgZZMFKklAQGmyL7VOIfMzPqRB1InlB4D5g4A+tSGUITR2pS6i
+    skip_symbols: false
