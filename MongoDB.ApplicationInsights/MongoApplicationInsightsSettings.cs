@@ -14,6 +14,7 @@ namespace MongoDB.ApplicationInsights
                 "buildInfo",
                 "getLastError",
                 "isMaster",
+                "ping",
                 "saslStart",
                 "saslContinue"
             };

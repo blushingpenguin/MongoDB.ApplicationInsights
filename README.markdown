@@ -65,7 +65,7 @@ The telemetry can be configured by passing an instance of `MongoApplicationInsig
 ```
 
 `FilteredCommands` names the mongo commands to ignore. By default these are
-`buildInfo`, `getLastError`, `isMaster`, `saslStart` and `saslContinue`.
+`buildInfo`, `getLastError`, `isMaster`, `ping`, `saslStart` and `saslContinue`.
 
 `MaxQueryTime` is a fallback to prevent memory leaks if mongo reports that a command has started, but does not later report whether it has succeeded or failed. It is set to 4 hours by default -- if you have queries that run for longer than this time then you will need to increase the setting to prevent telemetry for those queries from being discarded.
 
