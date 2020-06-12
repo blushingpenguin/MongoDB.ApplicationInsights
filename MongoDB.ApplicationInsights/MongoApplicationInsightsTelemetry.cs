@@ -105,7 +105,7 @@ namespace MongoDB.ApplicationInsights
             if (activity != null)
             {
                 telemetry.Context.Operation.Id = activity.RootId;
-                telemetry.Context.Operation.ParentId = activity.ParentId;
+                telemetry.Context.Operation.ParentId = activity.Id;
 
                 foreach (var item in activity.Baggage)
                 {

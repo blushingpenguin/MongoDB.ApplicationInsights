@@ -208,7 +208,7 @@ namespace MongoDB.ApplicationInsights.Test
                 telemetry.Success.Should().BeTrue();
                 telemetry.Data.Should().Be("{ \"find\" : { \"field\" : \"blah\" } }");
                 telemetry.Context.Operation.Id.Should().Be(activity.RootId);
-                telemetry.Context.Operation.ParentId.Should().Be(null);
+                telemetry.Context.Operation.ParentId.Should().Be(activity.Id);
             }
             finally
             {
@@ -233,7 +233,7 @@ namespace MongoDB.ApplicationInsights.Test
                 telemetry.Success.Should().BeTrue();
                 telemetry.Data.Should().Be("{ \"find\" : { \"field\" : \"blah\" } }");
                 telemetry.Context.Operation.Id.Should().Be(activity.RootId);
-                telemetry.Context.Operation.ParentId.Should().Be(null);
+                telemetry.Context.Operation.ParentId.Should().Be(activity.Id);
                 telemetry.Context.GlobalProperties["bag"].Should().Be("cup");
             }
             finally
