@@ -160,6 +160,23 @@ namespace MongoDB.ApplicationInsights.Test
         }
 
         [Test]
+        public void CommandTextInstrumentationDisabledDoesNotRecordData()
+        {
+            var settings = new MongoApplicationInsightsSettings
+            {
+                EnableMongoCommandTextInstrumentation = false
+            };
+            var mocks = new Mocks(true, settings);
+
+            mocks.Telemetry.OnCommandStarted(CreateFindStartedEvent(2));
+            // Complete the command and check telemetry was recorded
+            mocks.Telemetry.OnCommandSucceeded(CreateFindSucceededEvent(2));
+            var telemetry = mocks.GetSingleTelemetry();
+            telemetry.Success.Should().BeTrue();
+            telemetry.Data.Should().Be(string.Empty);
+        }
+
+        [Test]
         public void CommandSucceeded()
         {
             var mocks = new Mocks();
@@ -217,6 +234,32 @@ namespace MongoDB.ApplicationInsights.Test
         }
 
         [Test]
+        public void CommandWithActivityW3CIdFormat()
+        {
+            var activity = new Activity("test");
+            activity.SetIdFormat(ActivityIdFormat.W3C);
+            activity.AddBaggage("bag", "cup");
+            activity.Start();
+
+            try
+            {
+                var mocks = new Mocks();
+                mocks.Telemetry.OnCommandStarted(CreateFindStartedEvent(4));
+                // Complete the command and check telemetry was recorded
+                mocks.Telemetry.OnCommandSucceeded(CreateFindSucceededEvent(4));
+                var telemetry = mocks.GetSingleTelemetry();
+                telemetry.Success.Should().BeTrue();
+                telemetry.Data.Should().Be("{ \"find\" : { \"field\" : \"blah\" } }");
+                telemetry.Context.Operation.Id.Should().Be(activity.TraceId.ToHexString());
+                telemetry.Context.Operation.ParentId.Should().Be(activity.SpanId.ToHexString());
+            }
+            finally
+            {
+                activity.Stop();
+            }
+        }
+
+        [Test]
         public void CommandWithActivityAndBaggage()
         {
             var activity = new Activity("test");
@@ -234,7 +277,7 @@ namespace MongoDB.ApplicationInsights.Test
                 telemetry.Data.Should().Be("{ \"find\" : { \"field\" : \"blah\" } }");
                 telemetry.Context.Operation.Id.Should().Be(activity.RootId);
                 telemetry.Context.Operation.ParentId.Should().Be(activity.Id);
-                telemetry.Context.GlobalProperties["bag"].Should().Be("cup");
+                telemetry.Properties["bag"].Should().Be("cup");
             }
             finally
             {
