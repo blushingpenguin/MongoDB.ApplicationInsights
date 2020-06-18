@@ -27,5 +27,10 @@ namespace MongoDB.ApplicationInsights
         /// to obtain telemetry for them.
         /// </summary>
         public TimeSpan MaxQueryTime { get; set; } = new TimeSpan(4, 0, 0);
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to track the Mongo command text in MongoDB dependencies.
+        /// </summary>
+        public bool EnableMongoCommandTextInstrumentation { get; set; } = true;
     }
 }

@@ -86,32 +86,54 @@ namespace MongoDB.ApplicationInsights
                 return;
             }
 
-            string target = FormatEndPoint(evt.ConnectionId.ServerId.EndPoint) + 
-                " | " + evt.DatabaseNamespace.ToString();
-            string dependencyName = target + " | " + evt.CommandName;
+            var target = $"{FormatEndPoint(evt.ConnectionId.ServerId.EndPoint)} | {evt.DatabaseNamespace}";
+            var dependencyName = $"{target} | {evt.CommandName}";
+
+            var commandText = string.Empty;
+            if (_settings.EnableMongoCommandTextInstrumentation)
+            {
+                // Command can't be null -- the CommandStartedEvent constructor throws to prevent this
+                commandText = evt.Command.ToString();
+            }
+
             var telemetry = new DependencyTelemetry()
             {
                 Name = dependencyName,
                 Type = "MongoDB",
                 Target = target,
-                // Command can't be null -- the CommandStartedEvent constructor throws to prevent this
-                Data = evt.Command.ToString(),
+                Data = commandText,
                 Success = true,
             };
             telemetry.GenerateOperationId();
             telemetry.Timestamp = DateTimeOffset.UtcNow;
 
+            /*
+             * copying implementation below from Microsoft's SqlClientDiagnosticSourceListener
+             * https://github.com/microsoft/ApplicationInsights-dotnet/blob/5ac6bb98d04b7da6d151c0338efece4c124c750a/WEB/Src/DependencyCollector/DependencyCollector/Implementation/SqlClientDiagnostics/SqlClientDiagnosticSourceListener.cs#L347
+             */
+
             var activity = Activity.Current;
+
             if (activity != null)
             {
-                telemetry.Context.Operation.Id = activity.RootId;
-                telemetry.Context.Operation.ParentId = activity.Id;
+                // for web applications the IdFormat is W3C so without the below check the parient ID is set incorrectly
+                if (activity.IdFormat == ActivityIdFormat.W3C)
+                {
+                    var traceId = activity.TraceId.ToHexString();
+                    telemetry.Context.Operation.Id = traceId;
+                    telemetry.Context.Operation.ParentId = activity.SpanId.ToHexString();
+                }
+                else
+                {
+                    telemetry.Context.Operation.Id = activity.RootId;
+                    telemetry.Context.Operation.ParentId = activity.Id;
+                }
 
                 foreach (var item in activity.Baggage)
                 {
-                    if (!telemetry.Context.GlobalProperties.ContainsKey(item.Key))
+                    if (!telemetry.Properties.ContainsKey(item.Key))
                     {
-                        telemetry.Context.GlobalProperties[item.Key] = item.Value;
+                        telemetry.Properties[item.Key] = item.Value;
                     }
                 }
             }
@@ -131,7 +153,7 @@ namespace MongoDB.ApplicationInsights
                 return;
             }
             query.Telemetry.Duration = evt.Duration;
-            _telemetryClient.TrackDependency(query.Telemetry);                
+            _telemetryClient.TrackDependency(query.Telemetry);
         }
 
         internal void OnCommandFailed(CommandFailedEvent evt)
