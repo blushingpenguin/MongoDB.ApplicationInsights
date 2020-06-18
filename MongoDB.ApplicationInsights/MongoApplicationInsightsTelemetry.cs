@@ -7,6 +7,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
+using System.Threading;
 
 namespace MongoDB.ApplicationInsights
 {
@@ -27,7 +28,7 @@ namespace MongoDB.ApplicationInsights
             new ConcurrentDictionary<int, CachedQuery>();
         private readonly TelemetryClient _telemetryClient;
         private readonly MongoApplicationInsightsSettings _settings;
-        private DateTime _nextPruneTime;
+        private long _nextPruneTimeTicks;
 
         public MongoApplicationInsightsTelemetry(
             MongoClientSettings clientSettings, 
@@ -47,15 +48,25 @@ namespace MongoDB.ApplicationInsights
                 clusterConfigurator.Subscribe<CommandSucceededEvent>(OnCommandSucceeded);
                 clusterConfigurator.Subscribe<CommandFailedEvent>(OnCommandFailed);
             };
-            _nextPruneTime = DateTime.UtcNow.Add(_settings.MaxQueryTime);
+            _nextPruneTimeTicks = DateTime.UtcNow.Add(_settings.MaxQueryTime).Ticks;
         }
 
         internal void Prune(DateTime now)
         {
-            if (now < _nextPruneTime)
+            var currentPruneTime = _nextPruneTimeTicks;
+
+            if (now.Ticks < currentPruneTime)
             {
                 return;
             }
+
+            var nextPruneTime = now.Add(_settings.MaxQueryTime).Ticks;
+
+            if (Interlocked.CompareExchange(ref _nextPruneTimeTicks, nextPruneTime, currentPruneTime) != currentPruneTime)
+            {
+                return;
+            }
+
             var expiryTime = now.Subtract(_settings.MaxQueryTime);
 
             foreach (var cacheEntry in _queryCache)
@@ -65,7 +76,6 @@ namespace MongoDB.ApplicationInsights
                     _queryCache.TryRemove(cacheEntry.Key, out _);
                 }
             }
-            _nextPruneTime = now.Add(_settings.MaxQueryTime);
         }
 
         internal static string FormatEndPoint(EndPoint endPoint)
