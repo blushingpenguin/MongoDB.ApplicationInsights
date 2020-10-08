@@ -42,8 +42,10 @@ namespace MongoDB.ApplicationInsights
             }
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _telemetryClient = telemetryClient ?? throw new ArgumentNullException(nameof(telemetryClient));
+            var prevClusterConfigurator = clientSettings.ClusterConfigurator;
             clientSettings.ClusterConfigurator = clusterConfigurator =>
             {
+                prevClusterConfigurator?.Invoke(clusterConfigurator);
                 clusterConfigurator.Subscribe<CommandStartedEvent>(OnCommandStarted);
                 clusterConfigurator.Subscribe<CommandSucceededEvent>(OnCommandSucceeded);
                 clusterConfigurator.Subscribe<CommandFailedEvent>(OnCommandFailed);
